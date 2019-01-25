@@ -1,0 +1,91 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import accuracy_score
+from sklearn.linear_model import LogisticRegression
+
+
+# url = "https://raw.githubusercontent.com/aldkak/toxic_text_classification/master/data/train.csv"
+filename = r"toxic_text_train.csv"
+
+class_names = ['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']
+
+train_data = pd.read_csv(filename).fillna(' ')
+# Logistic regression
+def vectoize(X):
+	#X.loc[len(X)]=X
+	vect = CountVectorizer()
+	vect.fit(X)
+	return vect.transform(X)
+
+	
+# LogisticRegression
+X_train_data=train_data["comment_text"]
+#import pdb; pdb.set_trace()
+x_train_vectorized = vectoize(X_train_data)
+
+y_train_data=train_data[class_names]
+
+
+#for i in range(len(class_names)):
+for i in range(1):
+	print("Training for ", str(class_names[i]))
+	y_train_temp=y_train_data[str(class_names[i])]
+	model = LogisticRegression()
+	model.fit(x_train_vectorized,y_train_temp)
+	print("train LR model with x_train and ", str(class_names[i])," columns")
+
+# Keras
+
+def toknizing(X):
+	max_features = 20000
+	tokenizer = Tokenizer(num_words=max_features)
+	tokenizer.fit_on_texts(list(X))
+	tokenized_X = tokenizer.texts_to_sequences(X)
+	#maxumim length	
+	maxlen = 200
+	X_tok= pad_sequences(tokenized_X, maxlen=maxlen)	
+	return X_tok
+	
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation
+from keras.layers import Bidirectional, GlobalMaxPool1D
+from keras.models import Model, Sequential
+from keras import initializers, regularizers, constraints, optimizers, layers
+from keras import backend as K
+
+X_train_start=train_data["comment_text"].values
+Y_train= train_data[class_names]
+X_train=toknizing(X_train_start)
+
+# LSTM
+inp = Input(shape=(200, ))
+embed_size = 128
+# Layers
+x = Embedding(20000, embed_size)(inp)
+x = LSTM(60, return_sequences=True,name='lstm_layer')(x)
+
+x = GlobalMaxPool1D()(x)
+x = Dropout(0.1)(x)
+
+x = Dense(50, activation="relu")(x)
+x = Dropout(0.1)(x)
+
+x = Dense(6, activation="sigmoid")(x)
+
+model = Model(inputs=inp, outputs=x)
+
+model.compile(loss='categorical_crossentropy',optimizer='adam',metrics=['accuracy'])
+
+batch_size = 32
+epochs = 2
+
+#model.fit(X_train,Y_train, batch_size=batch_size, epochs=epochs)
+model.summary()
+
+#get_3rd_layer_output = K.function([model.layers[0].input],[model.layers[2].output])
+#layer_output = get_3rd_layer_output([X_train[:1]])[0]
+#layer_output.shape
