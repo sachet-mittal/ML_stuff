@@ -17,9 +17,19 @@ This is not the appraoch the authors published. This is the LSTM version of the 
 Project-02:
 ==========
 
-Connect For Game:
+Connect Four Game:
 -----------------
 
 A simple connect 4 game. 
 I didn't write most of the code. It is a part of class assigment
 I wrote the code of how the AI player decides it's next move against a smart oppenent(another ai or human) or a random player
+
+Project-03:
+==========
+
+Simulations
+-----------
+
+This is not actually a ML code.
+This code generates simulations for an experiment.
+The experiment is pretty difficult to explain so I am leaving that for now.
